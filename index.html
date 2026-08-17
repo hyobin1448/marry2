@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>임효빈 ♥ 김지수 결혼합니다</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;500&family=Noto+Sans+KR:wght@300;400&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #faf7f2;
+      --rose: #c9908a;
+      --rose-light: #e8c4c1;
+      --rose-dark: #9e6b66;
+      --gold: #b8975a;
+      --text: #3a3530;
+      --text-light: #7a706a;
+      --serif: 'Noto Serif KR', serif;
+      --sans: 'Noto Sans KR', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--cream);
+      color: var(--text);
+      font-family: var(--serif);
+      font-size: 15px;
+      line-height: 1.8;
+      max-width: 480px;
+      margin: 0 auto;
+      overflow-x: hidden;
+    }
+
+    /* ── 로딩 ── */
+    #loading {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: #e8ddd5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.8s ease;
+    }
+    #loading.hide { opacity: 0; pointer-events: none; }
+    .loading-petal {
+      width: 60px; height: 60px;
+      margin-bottom: 28px;
+      animation: petalspin 2s linear infinite;
+    }
+    @keyframes petalspin { to { transform: rotate(360deg); } }
+    .loading-names {
+      font-family: var(--serif);
+      font-size: 20px;
+      color: #7a6055;
+      letter-spacing: 0.2em;
+      animation: fadepulse 1.6s ease-in-out infinite;
+    }
+    @keyframes fadepulse { 0%,100%{opacity:.5} 50%{opacity:1} }
+
+    /* ── 메인 히어로 ── */
+    .hero {
+      position: relative;
+      width: 100%;
+      height: 100svh;
+      min-height: 600px;
+      overflow: hidden;
+    }
+    .hero-img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+    }
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,.08) 0%, rgba(0,0,0,.35) 100%);
+    }
+    .hero-text {
+      position: absolute;
+      bottom: 7%;
+      left: 0; right: 0;
+      text-align: center;
+      color: #fff;
+      padding: 0 24px;
+    }
+    .hero-date {
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 300;
+      letter-spacing: 0.25em;
+      margin-bottom: 14px;
+      opacity: .9;
+    }
+    .hero-couple {
+      font-family: var(--serif);
+      font-size: 30px;
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 4px;
+    }
+    .hero-name-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .hero-subname {
+      font-family: var(--sans);
+      font-size: 15px;
+      font-weight: 300;
+      letter-spacing: 0.15em;
+      opacity: 0.8;
+      line-height: 1;
+    }
+    .hero-heart {
+      font-size: 18px;
+      display: inline-block;
+      margin: 8px 8px 0;
+      color: var(--rose-light);
+      animation: heartbeat 1.4s ease-in-out infinite;
+    }
+    @keyframes heartbeat { 0%,100%{transform:scale(1)} 50%{transform:scale(1.25)} }
+    .hero-scroll {
+      position: absolute;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,.7);
+      font-size: 12px;
+      letter-spacing: .15em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      animation: scrolldown 1.8s ease-in-out infinite;
+    }
+    @keyframes scrolldown { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(6px)} }
+    .hero-scroll::after {
+      content: '';
+      display: block;
+      width: 1px;
+      height: 30px;
+      background: rgba(255,255,255,.5);
+    }
+
+    /* ── 공통 섹션 ── */
+    section {
+      padding: 64px 28px;
+      text-align: center;
+    }
+    section + section { border-top: 1px solid #ede8e1; }
+    .sec-label {
+      font-family: var(--sans);
+      font-size: 11px;
+      font-weight: 300;
+      letter-spacing: .35em;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .sec-title {
+      font-size: 22px;
+      font-weight: 400;
+      letter-spacing: .08em;
+      margin-bottom: 32px;
+      color: var(--text);
+    }
+    .divider {
+      width: 40px;
+      height: 1px;
+      background: var(--rose-light);
+      margin: 0 auto 32px;
+    }
+
+    /* ── 초대 인사 ── */
+    .invite-text {
+      font-size: 15px;
+      line-height: 2.1;
+      color: var(--text-light);
+      word-break: keep-all;
+      white-space: pre-line;
+    }
+    .invite-rose {
+      display: block;
+      width: 36px;
+      margin: 28px auto 0;
+      opacity: .6;
+    }
+
+    /* ── 혼주 ── */
+    .parents-wrap {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 28px;
+    }
+    .parents-side { text-align: center; }
+    .parents-title {
+      font-family: var(--sans);
+      font-size: 11px;
+      color: var(--rose);
+      letter-spacing: .2em;
+      margin-bottom: 10px;
+    }
+    .parents-name {
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.9;
+    }
+    .parents-name span { color: var(--text-light); font-size: 12px; }
+
+    /* ── 커플 사진 ── */
+    .couple-photos {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .couple-photo {
+      aspect-ratio: 3/4;
+      overflow: hidden;
+      border-radius: 4px;
+    }
+    .couple-photo img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform .4s ease;
+    }
+    .couple-photo:hover img { transform: scale(1.04); }
+    .couple-name-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 24px;
+      font-size: 18px;
+      letter-spacing: .1em;
+    }
+    .couple-name-row .heart { color: var(--rose); font-size: 14px; }
+    .name-label {
+      font-family: var(--sans);
+      font-size: 11px;
+      color: var(--text-light);
+      letter-spacing: .2em;
+      margin-bottom: 4px;
+    }
+    .name-val { font-size: 18px; }
+    .phone-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 6px;
+      padding: 5px 14px;
+      border: 1px solid var(--rose-light);
+      border-radius: 20px;
+      font-family: var(--sans);
+      font-size: 12px;
+      color: var(--rose-dark);
+      text-decoration: none;
+      transition: background .2s;
+    }
+    .phone-btn:hover { background: var(--rose-light); }
+
+    /* ── 달력 ── */
+    .calendar-date-big {
+      font-size: 14px;
+      font-family: var(--sans);
+      color: var(--text-light);
+      letter-spacing: .1em;
+      margin-bottom: 24px;
+    }
+    .calendar-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--sans);
+      font-size: 14px;
+    }
+    .calendar-table th {
+      padding: 8px 0;
+      font-weight: 400;
+      font-size: 12px;
+      color: var(--text-light);
+      letter-spacing: .05em;
+    }
+    .calendar-table th:first-child { color: #c9826a; }
+    .calendar-table th:last-child { color: #6a8ac9; }
+    .calendar-table td {
+      padding: 9px 0;
+      text-align: center;
+      color: var(--text);
+    }
+    .calendar-table td.sun { color: #c9826a; }
+    .calendar-table td.sat { color: #6a8ac9; }
+    .calendar-table td.wedding {
+      position: relative;
+    }
+    .calendar-table td.wedding::before {
+      content: '';
+      position: absolute;
+      left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      width: 34px; height: 34px;
+      background: var(--rose);
+      border-radius: 50%;
+      z-index: 0;
+    }
+    .calendar-table td.wedding span {
+      position: relative;
+      z-index: 1;
+      color: #fff;
+      font-weight: 500;
+    }
+    .calendar-time {
+      margin-top: 20px;
+      font-family: var(--sans);
+      font-size: 14px;
+      color: var(--text-light);
+      letter-spacing: .08em;
+    }
+
+    /* ── D-day ── */
+    .dday-wrap {
+      background: var(--rose);
+      border-radius: 12px;
+      padding: 32px 16px;
+      color: #fff;
+      margin: 0 -4px;
+    }
+    .dday-label {
+      font-family: var(--sans);
+      font-size: 12px;
+      letter-spacing: .3em;
+      opacity: .85;
+      margin-bottom: 16px;
+    }
+    .dday-couple {
+      font-size: 18px;
+      letter-spacing: .12em;
+      margin-bottom: 20px;
+    }
+    .dday-counts {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+    }
+    .dday-unit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 56px;
+    }
+    .dday-num {
+      font-size: 32px;
+      font-family: var(--sans);
+      font-weight: 300;
+      line-height: 1;
+    }
+    .dday-uname {
+      font-family: var(--sans);
+      font-size: 11px;
+      opacity: .75;
+      margin-top: 4px;
+      letter-spacing: .1em;
+    }
+    .dday-sep {
+      font-size: 24px;
+      line-height: 1.3;
+      opacity: .5;
+      align-self: flex-start;
+      padding-top: 4px;
+    }
+    .dday-past {
+      font-family: var(--sans);
+      font-size: 15px;
+      letter-spacing: .05em;
+    }
+
+    /* ── 갤러리 ── */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      margin-bottom: 16px;
+    }
+    .gallery-item {
+      aspect-ratio: 1;
+      overflow: hidden;
+      cursor: pointer;
+      background: #e8ddd5;
+      content-visibility: auto;
+      contain-intrinsic-size: 1px 150px;
+    }
+    .gallery-item img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform .4s ease;
+    }
+    .gallery-item:hover img { transform: scale(1.08); }
+    .gallery-more-btn {
+      display: inline-block;
+      padding: 10px 28px;
+      border: 1px solid var(--rose-light);
+      border-radius: 24px;
+      font-family: var(--sans);
+      font-size: 13px;
+      color: var(--rose-dark);
+      cursor: pointer;
+      background: none;
+      transition: background .2s, color .2s;
+    }
+    .gallery-more-btn:hover { background: var(--rose); color: #fff; border-color: var(--rose); }
+
+    /* ── 갤러리 라이트박스 ── */
+    #lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.92);
+      z-index: 8000;
+      align-items: center;
+      justify-content: center;
+    }
+    #lightbox.open { display: flex; }
+    .lb-img {
+      max-width: 92vw;
+      max-height: 85vh;
+      object-fit: contain;
+      border-radius: 4px;
+    }
+    .lb-close {
+      position: absolute;
+      top: 18px; right: 22px;
+      font-size: 28px;
+      color: #fff;
+      cursor: pointer;
+      background: none;
+      border: none;
+      line-height: 1;
+    }
+    .lb-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,.15);
+      border: none;
+      color: #fff;
+      font-size: 22px;
+      padding: 14px 10px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .lb-prev { left: 10px; }
+    .lb-next { right: 10px; }
+
+    /* ── 오시는 길 ── */
+    .location-name {
+      font-size: 18px;
+      letter-spacing: .06em;
+      margin-bottom: 6px;
+    }
+    .location-hall {
+      font-family: var(--sans);
+      font-size: 13px;
+      color: var(--text-light);
+      letter-spacing: .05em;
+      margin-bottom: 20px;
+    }
+    .map-placeholder {
+      width: 100%;
+      height: 220px;
+      background: #e8e0d6;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+    .map-placeholder iframe {
+      width: 100%; height: 100%;
+      border: none;
+    }
+    .map-notice {
+      font-family: var(--sans);
+      font-size: 12px;
+      color: var(--text-light);
+      text-align: center;
+    }
+    .navi-btns {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    .navi-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 9px 18px;
+      border-radius: 22px;
+      font-family: var(--sans);
+      font-size: 13px;
+      text-decoration: none;
+      font-weight: 400;
+      border: 1px solid;
+      transition: opacity .2s;
+    }
+    .navi-btn:hover { opacity: .8; }
+    .navi-btn.kakao { background: #FEE500; color: #3C1E1E; border-color: #FEE500; }
+    .navi-btn.naver { background: #03C75A; color: #fff; border-color: #03C75A; }
+    .navi-btn.tmap  { background: #00aff0; color: #fff; border-color: #00aff0; }
+    .trans-list { text-align: left; margin-top: 24px; }
+    .trans-item { margin-bottom: 18px; }
+    .trans-title {
+      font-family: var(--sans);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: .15em;
+      color: var(--rose-dark);
+      margin-bottom: 6px;
+    }
+    .trans-text {
+      font-family: var(--sans);
+      font-size: 13px;
+      color: var(--text-light);
+      line-height: 1.85;
+      word-break: keep-all;
+    }
+
+    /* ── 마음 전하기 ── */
+    .account-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      text-align: left;
+    }
+    .account-box {
+      background: #fff;
+      border: 1px solid #ede8e1;
+      border-radius: 10px;
+      padding: 18px 20px;
+    }
+    .account-who {
+      font-family: var(--sans);
+      font-size: 12px;
+      color: var(--rose);
+      letter-spacing: .15em;
+      margin-bottom: 6px;
+    }
+    .account-name { font-size: 15px; margin-bottom: 4px; }
+    .account-num {
+      font-family: var(--sans);
+      font-size: 14px;
+      color: var(--text-light);
+    }
+    .copy-btn {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 5px 14px;
+      background: var(--cream);
+      border: 1px solid var(--rose-light);
+      border-radius: 16px;
+      font-family: var(--sans);
+      font-size: 12px;
+      color: var(--rose-dark);
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .copy-btn:hover { background: var(--rose-light); }
+    .copy-toast {
+      display: none;
+      position: fixed;
+      bottom: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,.75);
+      color: #fff;
+      font-family: var(--sans);
+      font-size: 13px;
+      padding: 10px 22px;
+      border-radius: 24px;
+      z-index: 9000;
+      white-space: nowrap;
+    }
+    .copy-toast.show { display: block; animation: toastfade 2s ease forwards; }
+    @keyframes toastfade { 0%{opacity:1} 70%{opacity:1} 100%{opacity:0} }
+
+    /* ── 푸터 ── */
+    footer {
+      padding: 40px 28px;
+      text-align: center;
+      background: #f0ebe3;
+    }
+    .footer-msg {
+      font-size: 14px;
+      color: var(--text-light);
+      line-height: 2;
+      margin-bottom: 20px;
+      white-space: pre-line;
+    }
+    .footer-heart { color: var(--rose); }
+    .footer-date {
+      font-family: var(--sans);
+      font-size: 12px;
+      color: var(--text-light);
+      letter-spacing: .2em;
+    }
+
+    /* ── 스크롤 애니메이션 ── */
+    .aos { opacity: 0; transform: translateY(30px); transition: opacity .7s ease, transform .7s ease; }
+    .aos.visible { opacity: 1; transform: none; }
+
+    /* ── 하객 사진 업로드 ── */
+    .upload-box {
+      border: 2px dashed var(--rose-light);
+      border-radius: 12px;
+      padding: 16px;
+      background: #fff;
+    }
+    .upload-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 32px 16px;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: background .2s;
+    }
+    .upload-placeholder:hover { background: #fdf8f5; }
+    .upload-placeholder svg { color: var(--rose-light); }
+    .upload-placeholder p { font-family: var(--sans); font-size: 14px; color: var(--text); margin: 0; }
+    .upload-placeholder span { font-family: var(--sans); font-size: 12px; color: var(--text-light); }
+    .preview-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .preview-item {
+      aspect-ratio: 1;
+      position: relative;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #ede8e1;
+    }
+    .preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .preview-remove {
+      position: absolute;
+      top: 4px; right: 4px;
+      width: 22px; height: 22px;
+      background: rgba(0,0,0,.55);
+      border: none;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+    .preview-add {
+      aspect-ratio: 1;
+      border: 2px dashed var(--rose-light);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 26px;
+      color: var(--rose-light);
+      background: #fdf8f5;
+    }
+    .upload-submit-btn {
+      width: 100%;
+      padding: 13px;
+      background: var(--rose);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: var(--sans);
+      font-size: 15px;
+      cursor: pointer;
+      transition: background .2s;
+      letter-spacing: .05em;
+    }
+    .upload-submit-btn:hover { background: var(--rose-dark); }
+    .upload-submit-btn:disabled { background: var(--rose-light); cursor: not-allowed; }
+    .progress-bar {
+      height: 6px;
+      background: #ede8e1;
+      border-radius: 3px;
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--rose);
+      width: 0%;
+      transition: width .3s ease;
+      border-radius: 3px;
+    }
+    .progress-text {
+      font-family: var(--sans);
+      font-size: 13px;
+      color: var(--text-light);
+      text-align: center;
+    }
+    .upload-result {
+      text-align: center;
+      padding: 16px;
+      font-family: var(--sans);
+      font-size: 14px;
+      color: var(--rose-dark);
+    }
+    .guest-gallery-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 32px 0 14px;
+    }
+    .guest-gallery-header span {
+      font-family: var(--sans);
+      font-size: 13px;
+      color: var(--text-light);
+    }
+    .refresh-btn {
+      padding: 6px 14px;
+      border: 1px solid var(--rose-light);
+      border-radius: 16px;
+      font-family: var(--sans);
+      font-size: 12px;
+      color: var(--rose-dark);
+      background: none;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .refresh-btn:hover { background: var(--rose-light); }
+    .guest-empty {
+      grid-column: 1 / -1;
+      padding: 48px 0;
+      text-align: center;
+      font-family: var(--sans);
+      font-size: 13px;
+      color: var(--text-light);
+      line-height: 2;
+    }
+    .gallery-item { position: relative; }
+    .video-badge {
+      position: absolute;
+      bottom: 6px; right: 6px;
+      background: rgba(0,0,0,.55);
+      color: #fff;
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-family: var(--sans);
+      pointer-events: none;
+    }
+    .preview-item video {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    /* 라이트박스 영상 */
+    #lb-video {
+      display: none;
+      max-width: 92vw;
+      max-height: 85vh;
+      border-radius: 4px;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+
+<!-- 로딩 -->
+<div id="loading">
+  <svg class="loading-petal" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="30" cy="14" rx="7" ry="13" fill="#e8c4c1" opacity=".9"/>
+    <ellipse cx="30" cy="14" rx="7" ry="13" fill="#e8c4c1" opacity=".9" transform="rotate(45 30 30)"/>
+    <ellipse cx="30" cy="14" rx="7" ry="13" fill="#deb0ac" opacity=".75" transform="rotate(90 30 30)"/>
+    <ellipse cx="30" cy="14" rx="7" ry="13" fill="#deb0ac" opacity=".75" transform="rotate(135 30 30)"/>
+    <ellipse cx="30" cy="14" rx="7" ry="13" fill="#c9908a" opacity=".6" transform="rotate(180 30 30)"/>
+    <ellipse cx="30" cy="14" rx="7" ry="13" fill="#c9908a" opacity=".6" transform="rotate(225 30 30)"/>
+    <ellipse cx="30" cy="14" rx="7" ry="13" fill="#b87e78" opacity=".45" transform="rotate(270 30 30)"/>
+    <ellipse cx="30" cy="14" rx="7" ry="13" fill="#b87e78" opacity=".45" transform="rotate(315 30 30)"/>
+    <circle cx="30" cy="30" r="5" fill="#9e6b66"/>
+  </svg>
+  <div class="loading-names">효빈 ♥ 지수</div>
+</div>
+
+<!-- 히어로 -->
+<section class="hero" style="padding:0">
+  <img class="hero-img" src="main.jpg" alt="메인 사진">
+  <div class="hero-overlay"></div>
+  <div class="hero-text">
+    <div class="hero-date">2026. 10. 03 SAT 12:00 PM</div>
+    <div class="hero-couple">
+      <div class="hero-name-col">
+        <span>임효빈</span>
+        <span class="hero-subname">아브라함</span>
+      </div>
+      <span class="hero-heart">♥</span>
+      <div class="hero-name-col">
+        <span>김지수</span>
+        <span class="hero-subname">데보라</span>
+      </div>
+    </div>
+  </div>
+  <!--<div class="hero-scroll">SCROLL</div>-->
+</section>
+
+<!-- 초대 인사 -->
+<section>
+ <!-- <div class="sec-label aos">Wedding Invitation</div>
+  <div class="sec-title aos">청첩장</div>-->
+  <div class="divider aos"></div>
+  <p class="invite-text aos">사랑은 참고 기다립니다. 
+  사랑은 친절합니다.
+  
+  사랑은 시기하지 않고 
+  뽐내지 않으며 
+  교만하지 않습니다.
+  
+  사랑은 무례하지 않고 
+  자기 이익을 추구하지 않으며
+  성을 내지 않고 앙심을 품지 않습니다.
+  
+  사랑은 불의에 기뻐하지 않고 
+  진실을 두고 함께 기뻐합니다.
+  
+  사랑은 모든 것을 덮어 주고
+  모든 것을 믿으며
+  모든 것을 바라고 모든 것을 견디어 냅니다.
+  
+  코린토 1서 13장 4-7절</p>
+  <svg class="invite-rose" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M18 6 C18 6 10 12 10 20 C10 26 13.5 30 18 30 C22.5 30 26 26 26 20 C26 12 18 6 18 6Z" fill="#e8c4c1"/>
+    <path d="M18 10 C18 10 13 15 13 21 C13 25 15.2 28 18 28 C20.8 28 23 25 23 21 C23 15 18 10 18 10Z" fill="#c9908a"/>
+    <line x1="18" y1="28" x2="18" y2="36" stroke="#9e6b66" stroke-width="1.2"/>
+  </svg>
+</section>
+
+<!-- 혼주 -->
+<section>
+  <div class="sec-label aos">Parents</div>
+  <div class="sec-title aos">혼주</div>
+  <div class="divider aos"></div>
+  <div class="parents-wrap aos">
+    <div class="parents-side">
+      <div class="parents-title">신랑측</div>
+      <div class="parents-name">
+        임중규(도미니코)<br>
+        김성희(세실리아)<br>
+        <span>차남</span>
+      </div>
+    </div>
+    <div style="width:1px; background:#ede8e1; margin: 0 4px;"></div>
+    <div class="parents-side">
+      <div class="parents-title">신부측</div>
+      <div class="parents-name">
+        김성학(세례자 요한)<br>
+        김정아(효주아녜스)<br>
+        <span>장녀</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 신랑 신부 -->
+<section>
+  <div class="sec-label aos">Groom &amp; Bride</div>
+  <div class="sec-title aos">신랑 &amp; 신부</div>
+  <div class="divider aos"></div>
+  <div class="couple-photos aos">
+    <div class="couple-photo">
+      <img src="hyobin.jpg" alt="신랑 사진">
+    </div>
+    <div class="couple-photo">
+      <img src="jisoo.jpg" alt="신부 사진">
+    </div>
+  </div>
+  <div class="couple-name-row aos">
+    <div style="text-align:center">
+      <div class="name-label">신랑</div>
+      <div class="name-val">임효빈</div>
+      <a class="phone-btn" href="tel:010-3543-6961">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8a19.79 19.79 0 01-3.07-8.67A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92v2z"/></svg>
+        연락하기
+      </a>
+    </div>
+    <div class="heart">♥</div>
+    <div style="text-align:center">
+      <div class="name-label">신부</div>
+      <div class="name-val">김지수</div>
+      <a class="phone-btn" href="tel:010-3488-0377">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8a19.79 19.79 0 01-3.07-8.67A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92v2z"/></svg>
+        연락하기
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- 달력 & D-day -->
+<section>
+  <div class="sec-label aos">Date</div>
+  <div class="sec-title aos">날짜</div>
+  <div class="divider aos"></div>
+  <div class="calendar-date-big aos">2026년 10월</div>
+  <table class="calendar-table aos">
+    <thead>
+      <tr>
+        <th>일</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th>토</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="sun"></td><td></td><td></td><td></td><td>1</td><td>2</td><td class="sat wedding"><span>3</span></td>
+      </tr>
+      <tr>
+        <td class="sun">4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td class="sat">10</td>
+      </tr>
+      <tr>
+        <td class="sun">11</td><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td class="sat">17</td>
+      </tr>
+      <tr>
+        <td class="sun">18</td><td>19</td><td>20</td><td>21</td><td>22</td><td>23</td><td class="sat">24</td>
+      </tr>
+      <tr>
+        <td class="sun">25</td><td>26</td><td>27</td><td>28</td><td>29</td><td>30</td><td class="sat">31</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="calendar-time aos">2026년 10월 3일 토요일 오후 12시</div>
+
+  <div style="height:28px"></div>
+
+  <!-- D-day -->
+  <div class="dday-wrap aos" id="dday-wrap">
+    <div class="dday-label">D - DAY</div>
+    <div class="dday-couple">효빈 ♥ 지수</div>
+    <div id="dday-content" class="dday-counts">
+      <div class="dday-unit">
+        <div class="dday-num" id="dday-days">--</div>
+        <div class="dday-uname">일</div>
+      </div>
+      <div class="dday-sep">:</div>
+      <div class="dday-unit">
+        <div class="dday-num" id="dday-hours">--</div>
+        <div class="dday-uname">시간</div>
+      </div>
+      <div class="dday-sep">:</div>
+      <div class="dday-unit">
+        <div class="dday-num" id="dday-min">--</div>
+        <div class="dday-uname">분</div>
+      </div>
+      <div class="dday-sep">:</div>
+      <div class="dday-unit">
+        <div class="dday-num" id="dday-sec">--</div>
+        <div class="dday-uname">초</div>
+      </div>
+    </div>
+    <div id="dday-past" class="dday-past" style="display:none"></div>
+  </div>
+</section>
+
+<!-- 갤러리 -->
+<section>
+  <div class="sec-label aos">Gallery</div>
+  <div class="sec-title aos">갤러리</div>
+  <div class="divider aos"></div>
+  <div class="gallery-grid aos" id="gallery-grid">
+    <div class="guest-empty">불러오는 중...</div>
+  </div>
+  <button class="gallery-more-btn" id="gallery-more-btn" onclick="loadGallery(true)" style="display:none; margin-top:16px;">더 보기 ▾</button>
+</section>
+
+<!-- 라이트박스 -->
+<div id="lightbox">
+  <button class="lb-close" onclick="closeLightbox()">✕</button>
+  <button class="lb-nav lb-prev" onclick="lbNav(-1)">‹</button>
+  <img class="lb-img" id="lb-img" src="" alt="">
+  <video id="lb-video" controls playsinline></video>
+  <button class="lb-nav lb-next" onclick="lbNav(1)">›</button>
+</div>
+
+<!-- 오시는 길 -->
+<section>
+  <div class="sec-label aos">Location</div>
+  <div class="sec-title aos">오시는 길</div>
+  <div class="divider aos"></div>
+  <div class="location-name aos">범일성당</div>
+  <div class="location-hall aos">부산 동구 범곡남로 9</div>
+  <div class="map-placeholder aos" style="height:260px; border-radius:10px; overflow:hidden; margin-bottom:16px;">
+    <iframe
+      src="https://maps.google.com/maps?q=부산+동구+범곡남로+9&output=embed&hl=ko&z=17"
+      width="100%" height="100%"
+      style="border:0; display:block;"
+      allowfullscreen=""
+      loading="lazy"
+      referrerpolicy="no-referrer-when-downgrade">
+    </iframe>
+  </div>
+  <div class="navi-btns aos">
+    <a class="navi-btn kakao"
+       href="https://map.kakao.com/link/search/범일성당 부산"
+       target="_blank" rel="noopener">카카오지도</a>
+    <a class="navi-btn naver"
+       href="https://map.naver.com/v5/search/범일성당%20부산%20동구"
+       target="_blank" rel="noopener">네이버지도</a>
+    <a class="navi-btn tmap"
+       href="https://tmap.life/8k0kbr1"
+       target="_blank" rel="noopener">T맵</a>
+  </div>
+  <div class="trans-list aos">
+    <div class="trans-item">
+      <div class="trans-title">지하철</div>
+      <div class="trans-text">
+        부산 도시철도 1호선 <b>범일역</b> 4번 출구<br>
+        도보 약 5분 (500m)
+      </div>
+    </div>
+    <div class="trans-item">
+      <div class="trans-title">버스</div>
+      <div class="trans-text">
+        <b>범일동성당 정류장</b><br>
+        40, 41, 42, 43, 80, 81, 87, 135, 138-1<br>
+        <b>범일역(범일2교차로) 정류장</b><br>
+        80, 81, 87, 135, 138-1, 508, 583
+      </div>
+    </div>
+    <div class="trans-item">
+      <div class="trans-title">자가용</div>
+      <div class="trans-text">
+        네비게이션에 <b>"범일성당"</b> 또는<br>
+        <b>"부산 동구 범곡남로 9"</b> 검색<br>
+        <span style="color:var(--rose-dark);">※ 주차 공간이 협소할 수 있으니<br>대중교통 이용을 권장드립니다.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section>
+  <div class="sec-label aos">Gift</div>
+  <div class="sec-title aos">마음 전하기</div>
+  <div class="divider aos"></div>
+  <p class="invite-text aos" style="font-size:13px;margin-bottom:24px;">참석이 어려우신 분들을 위해<br>계좌번호를 안내드립니다.</p>
+  <div class="account-wrap aos">
+    <div class="account-box">
+      <div class="account-who">신랑</div>
+      <div class="account-name">임효빈</div>
+      <div class="account-num">국민은행 93543696142</div>
+      <button class="copy-btn" onclick="copyAccount('국민은행 93543696142')">계좌번호 복사</button>
+    </div>
+    <div class="account-box">
+      <div class="account-who">신부</div>
+      <div class="account-name">김지수</div>
+      <div class="account-num">국민은행 696901-00-028253</div>
+      <button class="copy-btn" onclick="copyAccount('국민은행 696901-00-028253')">계좌번호 복사</button>
+    </div>
+  </div>
+</section>
+<!-- 하객 사진 -->
+<section>
+  <div class="sec-label aos">Guest Photos</div>
+  <div class="sec-title aos">사진 / 영상</div>
+  <div class="divider aos"></div>
+  <p class="invite-text aos" style="font-size:13px;margin-bottom:24px;">결혼식에서 찍으신 소중한 사진을<br>올려주시면 함께 간직하겠습니다 ♥</p>
+
+  <!-- 업로드 영역 -->
+  <div class="upload-box aos">
+    <input type="file" id="file-input" multiple accept="image/*,video/*" style="display:none">
+
+    <div class="upload-placeholder" id="upload-placeholder"
+         onclick="document.getElementById('file-input').click()"
+         ondragover="event.preventDefault()"
+         ondrop="handleDrop(event)">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+        <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+        <polyline points="21 15 16 10 5 21"/>
+      </svg>
+      <p>사진/영상 선택 또는 끌어다 놓기</p>
+      <span>최대 10개 · 사진 · 파일당 25MB 이하</span>
+    </div>
+
+    <div class="preview-list" id="preview-list" style="display:none"></div>
+
+    <button class="upload-submit-btn" id="upload-btn" style="display:none" onclick="startUpload()">
+      사진/영상 올리기
+    </button>
+
+    <div id="upload-progress" style="display:none">
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="progress-text" id="progress-text">업로드 중...</div>
+    </div>
+
+    <div class="upload-result" id="upload-result" style="display:none"></div>
+  </div>
+
+  <!-- 하객 갤러리 -->
+  <div class="guest-gallery-header">
+    <span>업로드된 사진 / 영상</span>
+    <button class="refresh-btn" onclick="loadGuestPhotos()">↺ 새로고침</button>
+  </div>
+  <div class="gallery-grid" id="guest-grid">
+    <div class="guest-empty">불러오는 중...</div>
+  </div>
+</section>
+
+<!-- 푸터 -->
+<footer>
+  <div class="footer-msg">내 생명의 사랑을 만났으니
+    내 품에 껴안고 보내지 않으리라.
+<span class="footer-heart">♥</span></div>
+  <div class="footer-date">2026. 10. 03 SAT</div>
+</footer>
+
+<!-- 복사 토스트 -->
+<div class="copy-toast" id="copy-toast">계좌번호가 복사되었습니다</div>
+
+<script>
+  // ── 로딩 ──
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.getElementById('loading').classList.add('hide');
+      setTimeout(() => document.getElementById('loading').remove(), 900);
+    }, 1600);
+  });
+
+  // ── D-day 카운터 ──
+  const weddingDate = new Date('2026-10-03T12:00:00');
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function updateDDay() {
+    const diff = weddingDate - new Date();
+    if (diff <= 0) {
+      document.getElementById('dday-content').style.display = 'none';
+      const past = document.getElementById('dday-past');
+      past.style.display = 'block';
+      const d = Math.floor(Math.abs(diff) / 86400000);
+      past.textContent = d === 0 ? '오늘입니다! 🎉' : `결혼 ${d}일째 ♥`;
+      return;
+    }
+    document.getElementById('dday-days').textContent  = pad(Math.floor(diff / 86400000));
+    document.getElementById('dday-hours').textContent = pad(Math.floor((diff % 86400000) / 3600000));
+    document.getElementById('dday-min').textContent   = pad(Math.floor((diff % 3600000) / 60000));
+    document.getElementById('dday-sec').textContent   = pad(Math.floor((diff % 60000) / 1000));
+  }
+  updateDDay();
+  setInterval(updateDDay, 1000);
+
+  // ── 공식 갤러리 로드 (Firebase Storage /gallery, 12장씩 페이지네이션) ──
+  let officialSrcs = [];
+  let galleryPageToken = null;
+
+  async function loadGallery(append = false) {
+    const grid    = document.getElementById('gallery-grid');
+    const moreBtn = document.getElementById('gallery-more-btn');
+
+    if (!append) {
+      officialSrcs = [];
+      galleryPageToken = null;
+      grid.innerHTML = '<div class="guest-empty">불러오는 중...</div>';
+    }
+    if (moreBtn) moreBtn.style.display = 'none';
+
+    try {
+      const listRef = storage.ref('gallery');
+      const opts    = { maxResults: 12 };
+      if (append && galleryPageToken) opts.pageToken = galleryPageToken;
+
+      const result = await listRef.list(opts);
+
+      if (result.items.length === 0 && !append) {
+        grid.innerHTML = '<div class="guest-empty">갤러리 사진이 없습니다.</div>';
+        return;
+      }
+
+      const files = await Promise.all(
+        result.items.map(async (item) => {
+          const url = await item.getDownloadURL();
+          return { url, name: item.name };
+        })
+      );
+
+      const emptyMsg = grid.querySelector('.guest-empty');
+      if (emptyMsg) emptyMsg.remove();
+
+      const startIdx = officialSrcs.length;
+      officialSrcs = [...officialSrcs, ...files.map(f => f.url)];
+
+      files.forEach((f, i) => {
+        const div = document.createElement('div');
+        div.className = 'gallery-item';
+        div.onclick = () => openLightbox(startIdx + i);
+        const img = document.createElement('img');
+        img.src = f.url;
+        img.alt = '갤러리';
+        img.loading = 'lazy';
+        img.decoding = 'async';
+        div.appendChild(img);
+        grid.appendChild(div);
+      });
+
+      galleryPageToken = result.nextPageToken || null;
+      if (moreBtn) moreBtn.style.display = galleryPageToken ? 'inline-block' : 'none';
+
+    } catch (err) {
+      console.error(err);
+      if (!append) {
+        grid.innerHTML = '<div class="guest-empty">불러오기 실패. 새로고침을 눌러주세요.</div>';
+      }
+    }
+  }
+
+  // ── 라이트박스 (공식 + 하객 갤러리 공용) ──
+  let guestSrcs = [];
+  let currentSrcs = officialSrcs;
+  let lbIdx = 0;
+
+  function isVideo(url) {
+    return /\.(mp4|mov|avi|webm|mkv)(\?|$)/i.test(url);
+  }
+
+  function lbShow(url) {
+    const img   = document.getElementById('lb-img');
+    const video = document.getElementById('lb-video');
+    if (isVideo(url)) {
+      img.style.display   = 'none';
+      video.style.display = 'block';
+      video.src = url;
+      video.play();
+    } else {
+      video.pause();
+      video.src = '';
+      video.style.display = 'none';
+      img.style.display   = 'block';
+      img.src = url;
+    }
+  }
+
+  function openLightbox(i) {
+    currentSrcs = officialSrcs;
+    lbIdx = i;
+    lbShow(currentSrcs[i]);
+    document.getElementById('lightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function openGuestLightbox(i) {
+    currentSrcs = guestSrcs;
+    lbIdx = i;
+    lbShow(currentSrcs[i]);
+    document.getElementById('lightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() {
+    const video = document.getElementById('lb-video');
+    video.pause();
+    video.src = '';
+    document.getElementById('lightbox').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function lbNav(dir) {
+    lbIdx = (lbIdx + dir + currentSrcs.length) % currentSrcs.length;
+    lbShow(currentSrcs[lbIdx]);
+  }
+  document.getElementById('lightbox').addEventListener('click', function(e) {
+    if (e.target === this) closeLightbox();
+  });
+
+  // ── 계좌 복사 ──
+  function copyAccount(text) {
+    navigator.clipboard.writeText(text).then(() => {
+      const toast = document.getElementById('copy-toast');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2200);
+    });
+  }
+
+  // ── AOS 스크롤 애니메이션 ──
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.aos').forEach(el => observer.observe(el));
+
+  // ── Firebase 초기화 ──
+  const firebaseConfig = {
+    apiKey: "AIzaSyDQiSovfnevN4_zfYSQfdvl74gDHngpujM",
+    authDomain: "hyobin-jisoo.firebaseapp.com",
+    projectId: "hyobin-jisoo",
+    storageBucket: "hyobin-jisoo.firebasestorage.app",
+    messagingSenderId: "712738626007",
+    appId: "1:712738626007:web:cdb0829279ff424f641392"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const storage = firebase.storage();
+
+  // ── 파일 선택 & 미리보기 ──
+  let selectedFiles = [];
+
+  document.getElementById('file-input').addEventListener('change', function () {
+    addFiles(Array.from(this.files));
+    this.value = '';
+  });
+
+  function handleDrop(e) {
+    e.preventDefault();
+    addFiles(Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')));
+  }
+
+  function addFiles(files) {
+    const remaining = 10 - selectedFiles.length;
+    if (remaining <= 0) { alert('최대 10장까지 선택할 수 있어요.'); return; }
+    selectedFiles = [...selectedFiles, ...files.slice(0, remaining)];
+    renderPreviews();
+  }
+
+  function removeFile(i) {
+    selectedFiles.splice(i, 1);
+    renderPreviews();
+  }
+
+  function renderPreviews() {
+    const placeholder = document.getElementById('upload-placeholder');
+    const previewList = document.getElementById('preview-list');
+    const uploadBtn   = document.getElementById('upload-btn');
+
+    if (selectedFiles.length === 0) {
+      placeholder.style.display = 'flex';
+      previewList.style.display = 'none';
+      uploadBtn.style.display   = 'none';
+      return;
+    }
+
+    placeholder.style.display = 'none';
+    previewList.style.display = 'grid';
+    uploadBtn.style.display   = 'block';
+
+    previewList.innerHTML = selectedFiles.map((f, i) => {
+      const url = URL.createObjectURL(f);
+      const media = f.type.startsWith('video/')
+        ? `<video src="${url}" muted playsinline style="width:100%;height:100%;object-fit:cover;display:block;"></video>`
+        : `<img src="${url}" alt="">`;
+      return `<div class="preview-item">
+        ${media}
+        <button class="preview-remove" onclick="removeFile(${i})">✕</button>
+      </div>`;
+    }).join('');
+
+    if (selectedFiles.length < 10) {
+      previewList.innerHTML += `
+        <div class="preview-add" onclick="document.getElementById('file-input').click()">+</div>
+      `;
+    }
+  }
+
+  // ── 업로드 실행 ──
+  async function startUpload() {
+    if (selectedFiles.length === 0) return;
+
+    const btn      = document.getElementById('upload-btn');
+    const progress = document.getElementById('upload-progress');
+    const fill     = document.getElementById('progress-fill');
+    const text     = document.getElementById('progress-text');
+    const result   = document.getElementById('upload-result');
+
+    btn.disabled = true;
+    progress.style.display = 'block';
+    result.style.display   = 'none';
+    clearInterval(refreshInterval);
+
+    let done = 0;
+    const total = selectedFiles.length;
+    const uploaded = [];
+
+    for (let i = 0; i < selectedFiles.length; i++) {
+      const file = selectedFiles[i];
+      try {
+        const ext      = file.name.split('.').pop();
+        const fileName = `guest-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const fileRef  = storage.ref(`wedding/${fileName}`);
+
+        await new Promise((resolve, reject) => {
+          const task = fileRef.put(file);
+          task.on('state_changed',
+            (snap) => {
+              const overall = Math.round(((i + snap.bytesTransferred / snap.totalBytes) / total) * 100);
+              fill.style.width = overall + '%';
+              text.textContent = overall + '%';
+            },
+            reject,
+            async () => {
+              const url = await task.snapshot.ref.getDownloadURL();
+              uploaded.push({ url, name: fileName });
+              done++;
+              fill.style.width = Math.round(((i + 1) / total) * 100) + '%';
+              text.textContent = Math.round(((i + 1) / total) * 100) + '%';
+              resolve();
+            }
+          );
+        });
+      } catch (err) {
+        console.error('업로드 실패:', err);
+      }
+    }
+
+    progress.style.display = 'none';
+    btn.style.display       = 'none';
+    btn.disabled            = false;
+    result.style.display    = 'block';
+    result.innerHTML        = `♥ ${done}개가 업로드되었습니다!`;
+
+    if (uploaded.length > 0) {
+      const grid    = document.getElementById('guest-grid');
+      const emptyMsg = grid.querySelector('.guest-empty');
+      if (emptyMsg) emptyMsg.remove();
+
+      uploaded.forEach((f) => {
+        guestSrcs.unshift(f.url);
+        const item  = document.createElement('div');
+        item.className = 'gallery-item';
+        const thumb = isVideo(f.name)
+          ? `<video src="${f.url}" muted playsinline style="width:100%;height:100%;object-fit:cover;display:block;"></video>
+             <div class="video-badge">▶ 영상</div>`
+          : `<img src="${f.url}" alt="하객 사진">`;
+        item.innerHTML = thumb;
+        item.onclick   = () => openGuestLightbox(0);
+        grid.insertBefore(item, grid.firstChild);
+      });
+    }
+
+    selectedFiles = [];
+    renderPreviews();
+    setTimeout(() => { result.style.display = 'none'; }, 2000);
+    refreshInterval = setInterval(() => loadGuestPhotos(true), 5000);
+  }
+
+  // ── 하객 갤러리 로드 ──
+  async function loadGuestPhotos(silent = false) {
+    const grid = document.getElementById('guest-grid');
+    if (!silent) {
+      grid.innerHTML = '<div class="guest-empty">불러오는 중...</div>';
+    }
+
+    try {
+      const listRef = storage.ref('wedding');
+      const result  = await listRef.listAll();
+
+      if (result.items.length === 0) {
+        if (!silent) {
+          grid.innerHTML = '<div class="guest-empty">아직 업로드된 파일이 없어요.<br>첫 번째로 올려주세요 ♥</div>';
+        }
+        return;
+      }
+
+      const files = await Promise.all(
+        result.items.map(async (item) => {
+          const url = await item.getDownloadURL();
+          return { url, name: item.name };
+        })
+      );
+      files.sort((a, b) => b.name.localeCompare(a.name));
+
+      guestSrcs = files.map(f => f.url);
+      grid.innerHTML = files.map((f, i) => {
+        const thumb = isVideo(f.name)
+          ? `<video src="${f.url}" muted playsinline style="width:100%;height:100%;object-fit:cover;display:block;"></video>
+             <div class="video-badge">▶ 영상</div>`
+          : `<img src="${f.url}" alt="하객 사진">`;
+        return `<div class="gallery-item" onclick="openGuestLightbox(${i})">${thumb}</div>`;
+      }).join('');
+    } catch (err) {
+      console.error(err);
+      if (!silent) {
+        grid.innerHTML = '<div class="guest-empty">불러오기 실패. 새로고침을 눌러주세요.</div>';
+      }
+    }
+  }
+
+  loadGallery();
+  loadGuestPhotos();
+  let refreshInterval = setInterval(() => loadGuestPhotos(true), 5000);
+</script>
+</body>
+</html>
