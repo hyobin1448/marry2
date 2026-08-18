@@ -980,7 +980,7 @@
   </div>
 </section>
 
-<!-- 갤러리
+<!-- 갤러리 (숨김: 다시 보이게 하려면 이 줄과 아래 닫는 주석 줄을 지우세요)
 <section>
   <div class="sec-label aos">Gallery</div>
   <div class="sec-title aos">갤러리</div>
@@ -990,6 +990,9 @@
   </div>
   <button class="gallery-more-btn" id="gallery-more-btn" onclick="loadGallery(true)" style="display:none; margin-top:16px;">더 보기 ▾</button>
 </section>
+-->
+
+<!-- 라이트박스 (방명록에서도 사용하므로 갤러리를 숨겨도 유지) -->
 <div id="lightbox">
   <button class="lb-close" onclick="closeLightbox()">✕</button>
   <button class="lb-nav lb-prev" onclick="lbNav(-1)">‹</button>
@@ -997,7 +1000,7 @@
   <video id="lb-video" controls playsinline></video>
   <button class="lb-nav lb-next" onclick="lbNav(1)">›</button>
 </div>
- -->
+
 <!-- 오시는 길 -->
 <section>
   <div class="sec-label aos">Location</div>
@@ -1170,6 +1173,8 @@
   async function loadGallery(append = false) {
     const grid    = document.getElementById('gallery-grid');
     const moreBtn = document.getElementById('gallery-more-btn');
+
+    if (!grid) return;   // 갤러리 섹션이 숨겨진 경우
 
     if (!append) {
       officialSrcs = [];
