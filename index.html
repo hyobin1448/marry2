@@ -224,12 +224,14 @@
     /* ── 커플 사진 ── */
     .couple-photos {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
+      justify-items: center;
       gap: 12px;
       margin-bottom: 28px;
     }
     .couple-photo {
-      aspect-ratio: 3/4;
+      width: min(100%, 300px);
+      aspect-ratio: 2/3;
       overflow: hidden;
       border-radius: 4px;
     }
@@ -891,10 +893,7 @@
   <div class="divider aos"></div>
   <div class="couple-photos aos">
     <div class="couple-photo">
-      <img src="hyobin.jpg" alt="신랑 사진">
-    </div>
-    <div class="couple-photo">
-      <img src="jisoo.jpg" alt="신부 사진">
+      <img src="hyobin-jisoo.jpg" alt="신랑 신부 사진">
     </div>
   </div>
   <div class="couple-name-row aos">
